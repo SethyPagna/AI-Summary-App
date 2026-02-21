@@ -1,5 +1,7 @@
 export default function Dashboard({ user, projects, documents, onNavigate, onNewProject }) {
-  const userName = user?.user_metadata?.full_name?.split(' ')[0] || 'there';
+  const userName = user?.user_metadata?.full_name?.split(' ')[0]
+    || user?.user_metadata?.name?.split(' ')[0]
+    || 'there';
 
   const recentProjects = [...projects]
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))

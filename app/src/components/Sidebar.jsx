@@ -12,8 +12,9 @@ export default function Sidebar({
   onClose,
 }) {
   const toast = useToast();
-  const userInitial = (user?.user_metadata?.full_name || user?.email || 'U')[0].toUpperCase();
-  const userLabel = user?.user_metadata?.full_name || user?.email || 'User';
+  const userInitial = (user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'U')[0].toUpperCase();
+  const userLabel = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'User';
+  const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null;
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -92,7 +93,12 @@ export default function Sidebar({
 
         <div className="sidebar-footer">
           <div className="user-chip">
-            <div className="user-avatar">{userInitial}</div>
+            <div className="user-avatar" style={{ padding: 0, overflow: 'hidden' }}>
+              {avatarUrl
+                ? <img src={avatarUrl} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} referrerPolicy="no-referrer" />
+                : userInitial
+              }
+            </div>
             <div className="user-info">
               <div className="user-email">{userLabel}</div>
             </div>

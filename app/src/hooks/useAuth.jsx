@@ -8,13 +8,30 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    // Handle OAuth redirect — Supabase automatically exchanges the code
+    // in the URL hash/query params when getSession() is called.
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) console.warn('Session error:', error.message);
       setUser(data.session?.user ?? null);
       setLoading(false);
+
+      // Clean up OAuth params from URL after successful login
+      if (data.session && (window.location.hash || window.location.search.includes('code='))) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Listen for auth state changes — fires on:
+    //  SIGNED_IN  (email/password or OAuth callback)
+    //  SIGNED_OUT
+    //  TOKEN_REFRESHED
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      setLoading(false);
+
+      if (event === 'SIGNED_IN' && (window.location.hash || window.location.search.includes('code='))) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     });
 
     return () => subscription.unsubscribe();
