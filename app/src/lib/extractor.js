@@ -10,7 +10,7 @@ export const FILE_LIMITS = {
   supportedTypes: ['pdf', 'docx', 'doc', 'pptx', 'ppt', 'txt'],
   notes: [
     'Maximum file size: 20 MB',
-    'Supported formats: PDF, DOCX, DOC, PPTX, PPT, TXT',
+    'Supported formats: PDF, DOCX, DOC, PPTX, TXT',
     'Text is capped at ~12,000 characters sent to AI',
     'Scanned PDFs (image-only) cannot be extracted',
     '.doc and .ppt (legacy binary) have limited support — convert to .docx/.pptx for best results',

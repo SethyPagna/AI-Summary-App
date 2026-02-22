@@ -3,7 +3,6 @@ const EXT_ICON = {
   docx: '📝',
   doc: '📝',
   pptx: '📊',
-  ppt: '📊',
   txt: '📃',
 };
 

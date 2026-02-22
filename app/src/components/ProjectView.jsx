@@ -5,7 +5,8 @@ import FileUpload from './FileUpload';
 import SummaryPanel from './SummaryPanel';
 import ChatPanel from './ChatPanel';
 
-export default function ProjectView({ project, userId, readability }) {
+// export default function ProjectView({ project, userId, readability }) {
+export default function ProjectView({ project, readability }){
   const [documents, setDocuments] = useState([]);
   const [activeTab, setActiveTab] = useState('upload');
   const [modelId, setModelId] = useState(
@@ -154,10 +155,16 @@ export default function ProjectView({ project, userId, readability }) {
       <div style={{ display: activeTab === 'upload' ? 'block' : 'none' }}>
         <FileUpload
           projectId={project.id}
-          userId={userId}
           onDocumentAdded={handleDocumentAdded}
           modelId={modelId}
         />
+
+        {/* <ChatPanel
+          projectId={project.id}
+          documents={documents}
+          readability={readability}
+          modelId={modelId}
+        /> */}
       </div>
 
       <div style={{ display: activeTab === 'summary' ? 'block' : 'none' }}>
@@ -167,7 +174,6 @@ export default function ProjectView({ project, userId, readability }) {
       <div style={{ display: activeTab === 'chat' ? 'flex' : 'none', flexDirection: 'column' }}>
         <ChatPanel
           projectId={project.id}
-          userId={userId}
           documents={documents}
           readability={readability}
           modelId={modelId}

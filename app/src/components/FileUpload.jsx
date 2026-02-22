@@ -3,13 +3,13 @@ import { supabase } from '../lib/supabase';
 import { extractTextFromFile, truncateText, FILE_LIMITS } from '../lib/extractor';
 import { summarizeDocument } from '../lib/ai';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../hooks/useAuth';
 
 const FILE_ICONS = {
   pdf:  { icon: '📄', cls: 'file-type-pdf' },
   docx: { icon: '📝', cls: 'file-type-docx' },
   doc:  { icon: '📝', cls: 'file-type-docx' },
   pptx: { icon: '📊', cls: 'file-type-pptx' },
-  ppt:  { icon: '📊', cls: 'file-type-pptx' },
   txt:  { icon: '📃', cls: 'file-type-txt' },
 };
 
@@ -33,12 +33,14 @@ const STATUS_STEPS = {
   error:       { label: 'Error',         cls: 'status-error',      progress: 0 },
 };
 
-export default function FileUpload({ projectId, userId, onDocumentAdded, modelId }) {
+// export default function FileUpload({ projectId, userId, onDocumentAdded, modelId }) {
+export default function FileUpload({ projectId, onDocumentAdded, modelId }) {
   const [files, setFiles] = useState([]);
   const [dragging, setDragging] = useState(false);
   const [showLimits, setShowLimits] = useState(false);
   const inputRef = useRef(null);
   const toast = useToast();
+  const { user } = useAuth();
 
   const updateFile = useCallback((id, patch) =>
     setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f))),
@@ -48,6 +50,7 @@ export default function FileUpload({ projectId, userId, onDocumentAdded, modelId
     const { file, id } = entry;
 
     try {
+      if (!user) {throw new Error("User not authenticated. Please refresh and log in again.");}
       updateFile(id, { status: 'reading' });
       await new Promise((r) => setTimeout(r, 80)); // let React paint
 
@@ -61,7 +64,9 @@ export default function FileUpload({ projectId, userId, onDocumentAdded, modelId
       updateFile(id, { status: 'saving' });
 
       // Upload to Supabase storage
-      const storagePath = `${userId}/${projectId}/${Date.now()}_${file.name}`;
+      // const storagePath = `${userId}/${projectId}/${Date.now()}_${file.name}`;
+      // const { data: { user } } = await supabase.auth.getUser();
+      const storagePath = `${user.id}/${projectId}/${Date.now()}_${file.name}`;
       const { error: storageErr } = await supabase.storage
         .from('app-files')
         .upload(storagePath, file, { upsert: true });
@@ -73,7 +78,14 @@ export default function FileUpload({ projectId, userId, onDocumentAdded, modelId
       // Save document record
       const { data: doc, error: dbErr } = await supabase
         .from('documents')
-        .insert({ project_id: projectId, user_id: userId, name: file.name, content: truncated, summary })
+        // .insert({ project_id: projectId, user_id: userId, name: file.name, content: truncated, summary })
+        .insert({
+          project_id: projectId,
+          user_id: user.id,
+          name: file.name,
+          content: truncated,
+          summary
+        })
         .select()
         .single();
 
@@ -88,7 +100,7 @@ export default function FileUpload({ projectId, userId, onDocumentAdded, modelId
       updateFile(id, { status: 'error', errorMsg: msg });
       // Don't toast — error is shown inline under the file row
     }
-  }, [projectId, userId, modelId, onDocumentAdded, toast, updateFile]);
+  }, [projectId, modelId, onDocumentAdded, toast, updateFile]);
 
   function addFiles(rawFiles) {
     const entries = Array.from(rawFiles).map((file) => ({
@@ -145,7 +157,7 @@ export default function FileUpload({ projectId, userId, onDocumentAdded, modelId
           ref={inputRef}
           type="file"
           multiple
-          accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+          accept=".pdf,.doc,.docx,.pptx,.txt"
           style={{ display: 'none' }}
           onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }}
         />

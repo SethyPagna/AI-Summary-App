@@ -33,7 +33,8 @@ async function saveAiMessage(payload) {
   throw new Error('Role value rejected by DB.');
 }
 
-export default function ChatPanel({ projectId, userId, userInitial, documents, readability, modelId: propModelId, onModelChange }) {
+// export default function ChatPanel({ projectId, userId, userInitial, documents, readability, modelId: propModelId, onModelChange }) {
+export default function ChatPanel({ projectId, userInitial, documents, readability, modelId: propModelId, onModelChange }){
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -92,10 +93,11 @@ export default function ChatPanel({ projectId, userId, userInitial, documents, r
 
   const sendMessage = useCallback(async (text) => {
     if (!text.trim() || loading) return;
+
     setInlineError('');
 
     if (!documents.length) {
-      setInlineError('No documents yet — upload files on the Upload tab first.');
+      setInlineError('No documents yet — upload files first.');
       return;
     }
 
@@ -107,47 +109,53 @@ export default function ChatPanel({ projectId, userId, userInitial, documents, r
       role: 'user',
       text: text.trim(),
       project_id: projectId,
-      user_id: userId,
       id: uuidv4(),
     };
 
     try {
-      // Add user message to state once
       setMessages((prev) => [...prev, userMsg]);
 
-      const reply = await chatWithDocuments([...messages, userMsg], docsContext, modelId);
+      const reply = await chatWithDocuments(
+        [...messages, userMsg],
+        docsContext,
+        modelId
+      );
 
       const aiMsg = {
         text: reply,
-        id: uuidv4(),
         project_id: projectId,
-        user_id: userId,
       };
 
       setMessages((prev) => [
         ...prev,
-        { ...aiMsg, role: 'model' },
-      ]); // Add AI message only
+        { ...aiMsg, role: 'model', id: uuidv4() },
+      ]);
 
-      // Save user message
-      await supabase.from('chat_messages').insert(userMsg);
-      // Save AI message
-      await saveAiMessage(aiMsg);
+      // Save to DB (NO user_id)
+      await supabase.from('chat_messages').insert({
+        project_id: projectId,
+        role: 'user',
+        text: userMsg.text,
+      });
 
-      // Handle suggestions
+      await supabase.from('chat_messages').insert({
+        project_id: projectId,
+        role: 'model',
+        text: reply,
+      });
+
       setLoadingSuggestions(true);
+
       generateFollowUps(text.trim(), reply, modelId)
         .then((qs) => setSuggestions(qs))
-        .catch(() => {})
         .finally(() => setLoadingSuggestions(false));
 
     } catch (err) {
-      setInlineError(err.message || 'Request failed. Please try again.');
-      setMessages((prev) => prev.filter((m) => m.id !== userMsg.id)); // Remove user message on error
+      setInlineError(err.message || 'Request failed.');
     } finally {
       setLoading(false);
     }
-  }, [loading, documents, messages, docsContext, modelId, projectId, userId]);
+  }, [loading, documents, messages, docsContext, modelId, projectId]);
 
   function handleKeyDown(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
@@ -157,7 +165,6 @@ export default function ChatPanel({ projectId, userId, userInitial, documents, r
 
   return (
     <div className="chat-panel" style={{ 
-      border: '1px solid #ccc', 
       borderRadius: '8px', 
       padding: '10px', 
       height: '80vh', 
@@ -248,7 +255,7 @@ export default function ChatPanel({ projectId, userId, userInitial, documents, r
                 {msg.text}
               </div>
             ) : (
-              <div className="msg-bubble">
+              <div className="msg-bubble"style={{ border: '1px solid #ccc'}}>
                 <MarkdownRenderer content={msg.text} style={{ fontSize: readability.fontSize, lineHeight: readability.lineHeight, letterSpacing: readability.letterSpacing, color: 'var(--text-primary)' }} />
                 {msg.id === messages.length - 1 && (
                   <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 6 }}>

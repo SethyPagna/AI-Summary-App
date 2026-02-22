@@ -15,7 +15,11 @@ export default function NewProjectModal({ userId, onClose, onCreated }) {
     try {
       const { data, error } = await supabase
         .from('projects')
-        .insert({ user_id: userId, name: name.trim() })
+        // .insert({ user_id: userId, name: name.trim() })
+        .insert({
+          name: name.trim(),
+          user_id: user.id
+        })
         .select()
         .single();
 

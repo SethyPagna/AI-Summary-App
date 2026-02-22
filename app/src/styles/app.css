@@ -413,8 +413,8 @@ body {
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  padding: 0 24px;
-  gap: 16px;
+  justify-content: space-between; /* This ensures items are spaced apart */
+  padding: 0 24px; /* Padding on both sides */
   flex-shrink: 0;
 }
 
@@ -423,13 +423,14 @@ body {
   font-size: 18px;
   font-weight: 600;
   color: var(--text-primary);
-  flex: 1;
+  flex-grow: 1; /* Allow title to take available space */
+  text-align: left; /* Align title to the left */
 }
 
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 10px; /* Space between buttons */
 }
 
 .icon-btn {
@@ -762,8 +763,11 @@ body {
   text-overflow: ellipsis;
   max-width: 160px;
 }
-.summary-tab.active { background: var(--bg-card); color: var(--text-primary); box-shadow: var(--shadow-sm); }
-
+.summary-tab.active {
+  border: 1px solid #ccc; /* Add border for active tab */
+  border-radius: 4px; /* Optional: add border-radius for rounded corners */
+  background: #f9f9f9; /* Optional: change background color for active tab */
+}
 .summary-content {
   font-size: var(--r-font-size);
   line-height: var(--r-line-height);
@@ -1183,7 +1187,9 @@ body {
 }
 
 @media (max-width: 768px) {
-  :root { --sidebar-width: 0px; }
+  :root { 
+    --sidebar-width: 0px; 
+  }
   .sidebar {
     position: fixed;
     left: 0;
@@ -1193,18 +1199,30 @@ body {
     transform: translateX(-100%);
     z-index: 200;
   }
-  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
-  .page-body { padding: 16px; }
-  .projects-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-  .topbar { padding: 0 16px; }
-  .mobile-menu-btn { display: flex !important; }
+  .sidebar.open { 
+    transform: translateX(0); 
+    box-shadow: var(--shadow-lg); 
+  }
+  .page-body { 
+    padding: 16px; 
+  }
+  .projects-grid { 
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+  }
+  .topbar { 
+    padding: 0 16px; 
+  }
+  .mobile-menu-btn { 
+    display: flex !important; 
+  }
 }
-
-.mobile-menu-btn { display: none; }
 
 @media (max-width: 480px) {
   .stats-row { grid-template-columns: 1fr 1fr; }
   .chat-panel { height: 400px; }
+  .topbar-actions {
+    gap: 8px; /* Reduce gap on very small screens, if needed */
+  }
 }
 
 /* Scrollbar */

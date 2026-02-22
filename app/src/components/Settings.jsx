@@ -195,7 +195,7 @@ export default function Settings({ darkMode, onToggleDark, readability, onReadab
         </div>
         <div className="setting-row">
           <div className="setting-info"><div className="setting-label">Supported Files</div></div>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>PDF, DOCX, DOC, PPTX, PPT, TXT</span>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>PDF, DOCX, DOC, PPTX, TXT</span>
         </div>
         <div className="setting-row">
           <div className="setting-info"><div className="setting-label">AI Provider</div></div>
@@ -203,7 +203,7 @@ export default function Settings({ darkMode, onToggleDark, readability, onReadab
         </div>
         <div className="setting-row">
           <div className="setting-info"><div className="setting-label">Storage</div></div>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Supabase (app-files)</span>
+          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Supabase</span>
         </div>
       </div>
     </div>

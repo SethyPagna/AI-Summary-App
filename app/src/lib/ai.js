@@ -1,6 +1,6 @@
 // ─── OpenRouter Configuration ───────────────────────────────────────────────
 const OR_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const OR_API_KEY = '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';
+const OR_API_KEY = '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';
 
 export const MODELS = [
   {

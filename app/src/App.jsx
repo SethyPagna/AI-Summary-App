@@ -17,6 +17,7 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(
     () => localStorage.getItem('darkMode') === 'true'
   );
+
   const [readability, setReadability] = useState({
     fontSize: '16px',
     lineHeight: 1.7,
@@ -31,26 +32,38 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dataLoading, setDataLoading] = useState(false);
 
-  // Apply dark mode
+  // Dark mode
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    document.documentElement.setAttribute(
+      'data-theme',
+      darkMode ? 'dark' : 'light'
+    );
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
 
-  // Load user data
+  // Load user data (RLS handles filtering automatically)
   useEffect(() => {
-    if (!user) return;
+    // 🚫 Do nothing until auth fully resolved
+    if (authLoading || !user) return;
+
     setDataLoading(true);
 
     Promise.all([
-      supabase.from('projects').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-      supabase.from('documents').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+      supabase
+        .from('projects')
+        .select('*')
+        .order('created_at', { ascending: false }),
+
+      supabase
+        .from('documents')
+        .select('*')
+        .order('created_at', { ascending: false }),
     ]).then(([{ data: proj }, { data: docs }]) => {
       if (proj) setProjects(proj);
       if (docs) setDocuments(docs);
       setDataLoading(false);
     });
-  }, [user]);
+  }, [user, authLoading]);
 
   function handleNavigate(view, projectId = null) {
     setActiveView(view);
@@ -72,16 +85,12 @@ export default function App() {
 
   const activeProject = projects.find((p) => p.id === activeProjectId);
 
-  let pageTitle = 'Dashboard';
-  if (activeView === 'project') pageTitle = activeProject?.name || 'Project';
-  if (activeView === 'history') pageTitle = 'File History';
-  if (activeView === 'settings') pageTitle = 'Settings';
-
+  // 🔐 Wait until Supabase fully restores session
   if (authLoading) {
     return (
       <div className="loading-page">
         <span className="spinner" />
-        <p>Loading…</p>
+        <p>Restoring session…</p>
       </div>
     );
   }
@@ -109,17 +118,11 @@ export default function App() {
       />
 
       <div className="main-content">
-        {/* Topbar */}
-        <header className="topbar" style={{ height: '50px' }}>
-          <button
-            className="icon-btn mobile-menu-btn"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Menu"
-            style={{ display: 'none' }}
-          >
-            ☰
-          </button>
-          <div className="topbar-title"></div>
+        <header className="topbar">
+          <div className="topbar-title">
+            {/* App title or logo here */}
+          </div>
+
           <div className="topbar-actions">
             <button
               className="icon-btn"
@@ -128,22 +131,23 @@ export default function App() {
             >
               {darkMode ? '☀' : '⏾'}
             </button>
+
             <button
               className="btn btn-primary btn-sm"
               onClick={handleNewProject}
               style={{ width: 'auto' }}
+
             >
               + New Project
             </button>
           </div>
         </header>
 
-        {/* Page body */}
         <main className="page-body">
           {dataLoading ? (
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <span className="spinner" style={{ width: 28, height: 28, color: 'var(--accent)' }} />
-              <p style={{ color: 'var(--text-muted)', marginTop: 16, fontSize: 14 }}>
+              <span className="spinner" />
+              <p style={{ marginTop: 16 }}>
                 Loading your workspace…
               </p>
             </div>
@@ -162,21 +166,8 @@ export default function App() {
               {activeView === 'project' && activeProject && (
                 <ProjectView
                   project={activeProject}
-                  userId={user.id}
                   readability={readability}
                 />
-              )}
-
-              {activeView === 'project' && !activeProject && (
-                <div className="empty-state">
-                  <div className="empty-icon">◈</div>
-                  <h3>Project not found</h3>
-                  <p>This project may have been deleted.</p>
-                  <br />
-                  <button className="btn btn-primary" onClick={() => handleNavigate('home')} style={{ width: 'auto' }}>
-                    Go to Dashboard
-                  </button>
-                </div>
               )}
 
               {activeView === 'history' && (
@@ -202,7 +193,6 @@ export default function App() {
 
       {showNewProject && (
         <NewProjectModal
-          userId={user.id}
           onClose={() => setShowNewProject(false)}
           onCreated={handleProjectCreated}
         />

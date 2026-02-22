@@ -60,12 +60,12 @@ export default function SummaryPanel({ documents, readability }) {
         {/* Active doc summary */}
         {activeDoc && (
           <div style={{ 
-              maxHeight: '540px',  // Set a maximum height for the scrollable area
+              maxHeight: '535px',  // Set a maximum height for the scrollable area
               overflowY: 'auto',    // Enable vertical scrolling
               overflowX: 'hidden',   // Hide horizontal scrolling if not needed
-              padding: '40px',      // Optional padding
-              border: '1px solid var(--border-color)',
-              borderRadius: '4px'
+              padding: '20px',      // Optional padding
+              border:'1px solid #ccc',
+              borderRadius: '1px'
             }}>
             <MarkdownRenderer
               content={activeDoc.summary}
