@@ -1,5 +1,4 @@
-Introducing the AI Summary App
-Welcome to the AI Summary App, a fully functional web application designed to summarize various document types, including .docx, .pdf, .pptx and .txt. This app allows users to seamlessly interact with multiple files simultaneously, ensuring robust PDF text extraction using Vite’s local worker bundling.
+Introducing the AI Summary App, a fully functional web application designed to summarize various document types, including .docx, .pdf, .pptx and .txt. This app allows users to seamlessly interact with multiple files simultaneously, ensuring robust PDF text extraction using Vite’s local worker bundling.
 
 Key Features
 1. Responsiveness and Dark Mode: The app is responsive across all devices, providing a smooth experience on desktops, tablets, and mobile phones. Users can toggle between light and dark modes, enhancing comfort during usage.
